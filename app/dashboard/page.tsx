@@ -52,10 +52,8 @@ export default function DashboardPage() {
           ))}
         </section>
 
-        {/* Chart Section */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <StatsChart searched={searchedUsers} shortlisted={shortlistedUsers} repos={repositories} />
-        </div>
+        {/* Charts Section — Bar + Pie side by side */}
+        <StatsChart searched={searchedUsers} shortlisted={shortlistedUsers} repos={repositories} />
 
         {/* Quick Actions */}
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
