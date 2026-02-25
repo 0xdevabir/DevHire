@@ -45,6 +45,8 @@ export type ShortlistedCandidate = {
   location: string | null;
   publicRepos: number;
   addedAt: string;
+  rating: number;
+  comment: string;
 };
 
 export type DashboardStats = {

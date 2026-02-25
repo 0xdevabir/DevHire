@@ -23,7 +23,7 @@ export function isShortlisted(username: string) {
   );
 }
 
-export function addToShortlist(profile: GithubUserProfile) {
+export function addToShortlist(profile: GithubUserProfile, rating = 0, comment = "") {
   const current = getShortlist();
   if (current.some((candidate) => candidate.username === profile.login)) {
     return current;
@@ -40,6 +40,8 @@ export function addToShortlist(profile: GithubUserProfile) {
       location: profile.location,
       publicRepos: profile.public_repos,
       addedAt: new Date().toISOString(),
+      rating,
+      comment,
     },
     ...current,
   ];
@@ -52,6 +54,22 @@ export function removeFromShortlist(username: string) {
   const next = getShortlist().filter((candidate) => candidate.username !== username);
   localStorage.setItem(SHORTLIST_KEY, JSON.stringify(next));
   return next;
+}
+
+export function updateShortlistReview(username: string, rating: number, comment: string) {
+  const next = getShortlist().map((c) =>
+    c.username.toLowerCase() === username.toLowerCase()
+      ? { ...c, rating, comment }
+      : c,
+  );
+  localStorage.setItem(SHORTLIST_KEY, JSON.stringify(next));
+  return next;
+}
+
+export function getShortlistEntry(username: string): ShortlistedCandidate | undefined {
+  return getShortlist().find(
+    (c) => c.username.toLowerCase() === username.toLowerCase(),
+  );
 }
 
 export function getDashboardStats() {
