@@ -1,102 +1,62 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import AppShell from "@/components/AppShell";
+import StatCard from "@/components/StatCard";
+import StatsChart from "@/components/StatsChart";
+import { getDashboardStats, getShortlist } from "@/lib/storage";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 
-type GithubUser = {
-  id: number;
-  login: string;
-  avatar_url: string;
-  html_url: string;
-};
-
-export default function DashboardPage() {
-  const [allowed, setAllowed] = useState(false);
-  const [keyword, setKeyword] = useState("");
-  const [users, setUsers] = useState<GithubUser[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (!isLoggedIn) {
-      window.location.href = "/login";
-      return;
-    }
-    setAllowed(true);
-  }, []);
-
-  async function handleSearch(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!keyword.trim()) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(
-        `https://api.github.com/search/users?q=${encodeURIComponent(keyword)}&page=${page}&per_page=10`
-      );
-
-      if (!res.ok) throw new Error("Failed to fetch users");
-
-      const data = await res.json();
-      setUsers(data.items || []);
-    } catch {
-      setError("Something went wrong while searching.");
-    } finally {
-      setLoading(false);
-    }
+function readInitialStats() {
+  if (typeof window === "undefined") {
+    return { searchedUsers: 0, shortlistedUsers: 0, repositories: 0 };
   }
 
-  if (!allowed) return <main className="min-h-screen p-8">Checking login...</main>;
+  const stats = getDashboardStats();
+  const shortlist = getShortlist();
+
+  return {
+    searchedUsers: stats.totalSearchedUsers,
+    shortlistedUsers: shortlist.length,
+    repositories: shortlist.reduce((sum, item) => sum + item.publicRepos, 0),
+  };
+}
+
+export default function DashboardPage() {
+  const [{ searchedUsers, shortlistedUsers, repositories }] = useState(readInitialStats);
+
+  const statItems = useMemo(
+    () => [
+      { label: "Total searched users", value: searchedUsers },
+      { label: "Total shortlisted candidates", value: shortlistedUsers },
+      { label: "Total repositories (shortlist)", value: repositories },
+    ],
+    [repositories, searchedUsers, shortlistedUsers],
+  );
 
   return (
-    <main className="min-h-screen p-8 w-full mx-auto bg-[#272727]">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+    <AppShell>
+      <h2 className="text-2xl font-bold">Dashboard</h2>
+      <p className="mt-1 text-sm text-slate-600">Overview of recruiter activity and shortlisted candidates.</p>
 
-      <button
-        onClick={() => {
-          localStorage.removeItem("isLoggedIn");
-          window.location.href = "/login";
-        }}
-        className="mt-4 rounded-md bg-red-600 px-4 py-2 text-white"
-      >
-        Logout
-      </button>
-
-      <form onSubmit={handleSearch} className="mt-6 flex gap-2">
-        <input
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="Search GitHub users..."
-          className="flex-1 border rounded-md px-3 py-2"
-        />
-        <button type="submit" className="rounded-md bg-black text-white px-4 py-2">
-          Search
-        </button>
-      </form>
-
-      {loading && <p className="mt-4">Loading...</p>}
-      {error && <p className="mt-4 text-red-600">{error}</p>}
-
-      <ul className="mt-6 space-y-3">
-        {users.map((user) => (
-          <li key={user.id} className="border rounded-md p-3 flex items-center gap-3">
-            <img src={user.avatar_url} alt={user.login} className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">{user.login}</p>
-              <a
-                href={user.html_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                View GitHub Profile
-              </a>
-            </div>
-          </li>
+      <section className="mt-5 grid gap-3 sm:grid-cols-3">
+        {statItems.map((item) => (
+          <StatCard key={item.label} label={item.label} value={item.value} />
         ))}
-      </ul>
-    </main>
+      </section>
+
+      <div className="mt-5">
+        <StatsChart searched={searchedUsers} shortlisted={shortlistedUsers} repos={repositories} />
+      </div>
+
+      <section className="mt-5 flex flex-wrap gap-2">
+        <Link href="/developers" className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+          Search Developers
+        </Link>
+        <Link href="/shortlist" className="rounded-md bg-slate-200 px-4 py-2 text-sm font-medium text-slate-800">
+          Open Shortlist
+        </Link>
+      </section>
+    </AppShell>
   );
 }

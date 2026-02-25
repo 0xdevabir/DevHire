@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevHire — GitHub Developer Explorer
 
-## Getting Started
+DevHire is a recruiter-focused internal tool built with Next.js and Tailwind CSS to:
+- authenticate recruiter access
+- search GitHub developers
+- view detailed developer profiles
+- explore repositories
+- shortlist candidates with persistence
+- view summary analytics in dashboard
 
-First, run the development server:
+## Tech Stack
+
+- Next.js (App Router)
+- React + TypeScript
+- Tailwind CSS
+- GitHub REST API (proxied through internal API routes)
+
+## Run Project
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Optional: set a GitHub API token to improve rate limits
+
+```bash
+cp .env.example .env.local
+```
+
+Then add:
+
+```env
+GITHUB_TOKEN=your_github_token_here
+```
+
+3. Start development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Folder Structure
 
-## Learn More
+```text
+app/
+  api/github/                   # API layer for GitHub integration
+    search/route.ts
+    users/[username]/route.ts
+    users/[username]/repos/route.ts
+  dashboard/page.tsx            # analytics dashboard
+  developers/page.tsx           # search and pagination
+  developers/[username]/page.tsx# profile + repos + shortlist toggle
+  login/page.tsx                # basic auth form
+  shortlist/page.tsx            # shortlisted candidates
+  globals.css
+  layout.tsx
+  page.tsx
+components/
+  AppShell.tsx
+  DeveloperCard.tsx
+  RepoCard.tsx
+  ShortlistCard.tsx
+  StatCard.tsx
+  StatsChart.tsx
+lib/
+  auth.ts                       # session helpers (cookie + local storage)
+  client-api.ts                 # UI API wrappers
+  github-server.ts              # server-side GitHub fetch layer
+  storage.ts                    # shortlist + dashboard stats persistence
+  types.ts
+proxy.ts                        # protected route handling
+```
 
-To learn more about Next.js, take a look at the following resources:
+## State Management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project uses React local component state + localStorage:
+- Auth session: cookie (`devhire_session`) + localStorage
+- Shortlist data: localStorage (`devhire_shortlist`)
+- Dashboard stats: localStorage (`devhire_stats`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No external state library is used to keep bundle size small and performance high.
 
-## Deploy on Vercel
+## API Integration Flow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+UI does not call GitHub directly.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Instead:
+1. UI calls internal routes under `/api/github/*`
+2. Route handlers call GitHub API via `lib/github-server.ts`
+3. Responses are returned to UI with consistent error handling
+
+This keeps API logic separate from UI and allows secure token usage through server environment variables.
+
+## Performance Notes
+
+- `next/image` for avatar optimization
+- Route middleware protection before page render
+- Server-side API proxy with revalidation
+- Small, reusable UI components to reduce repeated render logic
