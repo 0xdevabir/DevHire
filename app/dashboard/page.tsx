@@ -36,27 +36,52 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <h2 className="text-2xl font-bold">Dashboard</h2>
-      <p className="mt-1 text-sm text-slate-600">Overview of recruiter activity and shortlisted candidates.</p>
+      <div className="space-y-6">
+        {/* Page heading */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Overview of your recruitment activity and shortlisted candidates.
+          </p>
+        </div>
 
-      <section className="mt-5 grid gap-3 sm:grid-cols-3">
-        {statItems.map((item) => (
-          <StatCard key={item.label} label={item.label} value={item.value} />
-        ))}
-      </section>
+        {/* Stats Cards */}
+        <section className="grid gap-4 sm:grid-cols-3">
+          {statItems.map((item, index) => (
+            <StatCard key={item.label} label={item.label} value={item.value} index={index} />
+          ))}
+        </section>
 
-      <div className="mt-5">
-        <StatsChart searched={searchedUsers} shortlisted={shortlistedUsers} repos={repositories} />
+        {/* Chart Section */}
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <StatsChart searched={searchedUsers} shortlisted={shortlistedUsers} repos={repositories} />
+        </div>
+
+        {/* Quick Actions */}
+        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">Quick Actions</h3>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/developers"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+              style={{ backgroundColor: "var(--brand-teal)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--teal-hover)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--brand-teal)")}
+            >
+              Search Developers
+            </Link>
+            <Link
+              href="/shortlist"
+              className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium transition-colors"
+              style={{ borderColor: "var(--brand-teal)", color: "var(--brand-teal)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--teal-light)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              View Shortlist
+            </Link>
+          </div>
+        </section>
       </div>
-
-      <section className="mt-5 flex flex-wrap gap-2">
-        <Link href="/developers" className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-          Search Developers
-        </Link>
-        <Link href="/shortlist" className="rounded-md bg-slate-200 px-4 py-2 text-sm font-medium text-slate-800">
-          Open Shortlist
-        </Link>
-      </section>
     </AppShell>
   );
 }

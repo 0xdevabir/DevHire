@@ -2,9 +2,34 @@
 
 :root {
   color-scheme: light;
+  /* Brand Colors */
+  --brand-teal: #38988d;
+  --teal-hover: #2d7d74;
+  --brand-navy: #1b364a;
+  --lighter-teal: #60b8b1;
+  --teal-light: #e6f7f5;
+  --teal-dark: #1f5f5a;
 }
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-teal);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal-hover);
 }

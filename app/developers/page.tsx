@@ -51,25 +51,29 @@ export default function DevelopersPage() {
 
   return (
     <AppShell>
-      <h2 className="text-2xl font-bold">Developer Search</h2>
-      <p className="mt-1 text-sm text-slate-600">Search by username and open profiles for repository-level review.</p>
+      <h2 className="text-2xl font-bold text-gray-900">Developer Search</h2>
+      <p className="mt-1 text-sm text-gray-500">Search by username and open profiles for repository-level review.</p>
 
       <form onSubmit={handleSearch} className="mt-5 flex flex-col gap-2 sm:flex-row">
         <input
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none ring-slate-900 focus:ring-2"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-transparent focus:ring-2"
+          style={{ '--tw-ring-color': 'var(--brand-teal)' } as React.CSSProperties}
           placeholder="Search users (e.g., frontend engineer)"
         />
         <button
           type="submit"
-          className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800"
+          className="shrink-0 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: 'var(--brand-teal)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--teal-hover)')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--brand-teal)')}
         >
           Search
         </button>
       </form>
 
-      <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
+      <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
         <p>{totalCount.toLocaleString()} users found</p>
         <p>
           Page {page} / {totalPages}
@@ -80,24 +84,24 @@ export default function DevelopersPage() {
         <button
           onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           disabled={page === 1 || loading || !activeQuery}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm disabled:opacity-50"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40"
         >
           Previous
         </button>
         <button
           onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           disabled={page >= totalPages || loading || !activeQuery}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm disabled:opacity-50"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40"
         >
           Next
         </button>
       </div>
 
-      {loading && <p className="mt-5 text-sm text-slate-600">Loading...</p>}
-      {error && <p className="mt-5 text-sm text-rose-600">{error}</p>}
+      {loading && <p className="mt-5 text-sm text-gray-500">Loading...</p>}
+      {error && <p className="mt-5 text-sm text-red-600">{error}</p>}
 
       {!loading && !error && users.length === 0 && activeQuery && (
-        <p className="mt-5 text-sm text-slate-600">No developers found for this search.</p>
+        <p className="mt-5 text-sm text-gray-500">No developers found for this search.</p>
       )}
 
       <section className="mt-5 space-y-3">

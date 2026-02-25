@@ -34,32 +34,52 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center px-4">
-            <form onSubmit={handleLogin} className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h1 className="text-2xl font-bold">Welcome to DevHire</h1>
-                <p className="mt-1 text-sm text-slate-600">Sign in to search and shortlist GitHub developers.</p>
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+            <form onSubmit={handleLogin} className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+                <div className="mb-6 flex items-center gap-3">
+                    <div
+                        className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white"
+                        style={{ backgroundColor: 'var(--brand-teal)' }}
+                    >
+                        D
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">DevHire</h1>
+                        <p className="text-xs text-gray-500">Recruitment platform</p>
+                    </div>
+                </div>
 
-                <label className="mt-6 block text-sm font-medium text-slate-700">Email</label>
+                <p className="text-sm text-gray-500">Sign in to search and shortlist GitHub developers.</p>
+
+                <label className="mt-5 block text-xs font-medium uppercase tracking-wide text-gray-600">Email</label>
                 <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none ring-slate-900 focus:ring-2"
+                    className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-transparent focus:ring-2"
+                    style={{ '--tw-ring-color': 'var(--brand-teal)' } as React.CSSProperties}
                     placeholder="recruiter@example.com"
                 />
 
-                <label className="mt-4 block text-sm font-medium text-slate-700">Password</label>
+                <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-gray-600">Password</label>
                 <input
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none ring-slate-900 focus:ring-2"
+                    className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-transparent focus:ring-2"
+                    style={{ '--tw-ring-color': 'var(--brand-teal)' } as React.CSSProperties}
                     placeholder="********"
                 />
 
-                {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
+                {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-                <button type="submit" className="mt-5 w-full rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800">
+                <button
+                    type="submit"
+                    className="mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                    style={{ backgroundColor: 'var(--brand-teal)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--teal-hover)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--brand-teal)')}
+                >
                     Sign In
                 </button>
             </form>

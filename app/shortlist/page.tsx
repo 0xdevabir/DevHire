@@ -23,8 +23,8 @@ export default function ShortlistPage() {
 
   return (
     <AppShell>
-      <h2 className="text-2xl font-bold">Candidate Shortlist</h2>
-      <p className="mt-1 text-sm text-slate-600">Stored locally in your browser for quick recruiter workflow.</p>
+      <h2 className="text-2xl font-bold text-gray-900">Candidate Shortlist</h2>
+      <p className="mt-1 text-sm text-gray-500">Stored locally in your browser for quick recruiter workflow.</p>
 
       <section className="mt-5 space-y-3">
         {candidates.map((candidate) => (
@@ -33,7 +33,7 @@ export default function ShortlistPage() {
       </section>
 
       {candidates.length === 0 && (
-        <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <div className="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
           No shortlisted candidates yet. Add developers from the profile page.
         </div>
       )}
