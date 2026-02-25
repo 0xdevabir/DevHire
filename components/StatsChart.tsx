@@ -1,6 +1,19 @@
 "use client";
 
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { useMemo, useState, useCallback } from "react";
+import {
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Sector,
+} from "recharts";
 
 type Props = {
   searched: number;
@@ -8,66 +21,269 @@ type Props = {
   repos: number;
 };
 
-export default function StatsChart({ searched, shortlisted, repos }: Props) {
-  const data = [
-    {
-      name: "Activity Overview",
-      "Developers Searched": searched,
-      "Candidates Shortlisted": shortlisted,
-      "Total Repositories": repos,
-    },
-  ];
+const COLORS = {
+  searched: "#38988d",
+  shortlisted: "#60b8b1",
+  repos: "#1b364a",
+  searchedLight: "#2d7d74",
+};
+
+/* ── custom active-shape renderer for pie ── */
+function renderActiveShape(props: Record<string, unknown>) {
+  const {
+    cx,
+    cy,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+  } = props as {
+    cx: number;
+    cy: number;
+    innerRadius: number;
+    outerRadius: number;
+    startAngle: number;
+    endAngle: number;
+    fill: string;
+    payload: { name: string };
+    percent: number;
+    value: number;
+  };
 
   return (
-    <section className="p-6">
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">Activity Snapshot</h3>
-        <p className="mt-1 text-sm text-gray-500">Your recruitment activity at a glance</p>
+    <g>
+      {/* label in centre */}
+      <text x={cx} y={cy - 8} textAnchor="middle" fill="#1f2937" className="text-sm font-semibold">
+        {payload.name}
+      </text>
+      <text x={cx} y={cy + 14} textAnchor="middle" fill="#6b7280" className="text-xs">
+        {value} ({(percent * 100).toFixed(0)}%)
+      </text>
+
+      {/* active ring */}
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={(outerRadius as number) + 6}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={(innerRadius as number) - 4}
+        outerRadius={innerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+        opacity={0.35}
+      />
+    </g>
+  );
+}
+
+/* ── custom tooltip ── */
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-lg">
+      <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
+      {payload.map((entry) => (
+        <div key={entry.name} className="flex items-center gap-2 py-0.5">
+          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span className="text-sm text-gray-700">{entry.name}:</span>
+          <span className="text-sm font-semibold text-gray-900">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function StatsChart({ searched, shortlisted, repos }: Props) {
+  const [activePieIndex, setActivePieIndex] = useState(0);
+
+  const onPieEnter = useCallback((_: unknown, index: number) => {
+    setActivePieIndex(index);
+  }, []);
+
+  /* bar-chart data — break metrics into comparative groups for a richer chart */
+  const barData = useMemo(() => {
+    const total = searched + shortlisted + repos || 1;
+    return [
+      {
+        name: "Searched",
+        value: searched,
+        pct: Math.round((searched / total) * 100),
+      },
+      {
+        name: "Shortlisted",
+        value: shortlisted,
+        pct: Math.round((shortlisted / total) * 100),
+      },
+      {
+        name: "Repositories",
+        value: repos,
+        pct: Math.round((repos / total) * 100),
+      },
+    ];
+  }, [searched, shortlisted, repos]);
+
+  /* pie-chart data */
+  const pieData = useMemo(
+    () => [
+      { name: "Searched", value: searched || 0, color: COLORS.searched },
+      { name: "Shortlisted", value: shortlisted || 0, color: COLORS.shortlisted },
+      { name: "Repositories", value: repos || 0, color: COLORS.repos },
+    ],
+    [searched, shortlisted, repos],
+  );
+
+  const barColors = [COLORS.searched, COLORS.shortlisted, COLORS.repos];
+
+  /* conversion rate */
+  const conversionRate = searched > 0 ? ((shortlisted / searched) * 100).toFixed(1) : "0";
+
+  return (
+    <section className="grid gap-6 lg:grid-cols-2">
+      {/* ── Bar Chart Card ── */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-100 px-6 py-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
+            Activity Breakdown
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500">Comparative view of all metrics</p>
+        </div>
+
+        <div className="px-2 pt-4 pb-2">
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }} barCategoryGap="30%">
+              <defs>
+                <linearGradient id="barGrad0" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.searched} stopOpacity={1} />
+                  <stop offset="100%" stopColor={COLORS.searched} stopOpacity={0.7} />
+                </linearGradient>
+                <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.shortlisted} stopOpacity={1} />
+                  <stop offset="100%" stopColor={COLORS.shortlisted} stopOpacity={0.7} />
+                </linearGradient>
+                <linearGradient id="barGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.repos} stopOpacity={1} />
+                  <stop offset="100%" stopColor={COLORS.repos} stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis
+                dataKey="name"
+                tick={{ fill: "#64748b", fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: "#94a3b8", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={36}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(56,152,141,0.06)" }} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]} animationDuration={800} name="Count">
+                {barData.map((_, idx) => (
+                  <Cell key={idx} fill={`url(#barGrad${idx})`} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Mini legend*/}
+        <div className="flex items-center justify-center gap-5 border-t border-gray-100 px-6 py-3">
+          {barData.map((d, i) => (
+            <div key={d.name} className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: barColors[i] }} />
+              <span className="text-xs text-gray-500">{d.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="rounded-lg">
-        <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
-              tick={{ fill: '#64748b', fontSize: 12 }} 
-              axisLine={{ stroke: '#e2e8f0' }}
-            />
-            <YAxis 
-              tick={{ fill: '#64748b', fontSize: 12 }} 
-              axisLine={{ stroke: '#e2e8f0' }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
-            />
-            <Legend 
-              wrapperStyle={{ paddingTop: '20px' }}
-            />
-            <Bar 
-              dataKey="Developers Searched" 
-              fill="var(--brand-teal)" 
-              radius={[4, 4, 0, 0]}
-              name="Developers Searched"
-            />
-            <Bar 
-              dataKey="Candidates Shortlisted" 
-              fill="var(--lighter-teal)" 
-              radius={[4, 4, 0, 0]}
-              name="Candidates Shortlisted"
-            />
-            <Bar 
-              dataKey="Total Repositories" 
-              fill="var(--brand-navy)" 
-              radius={[4, 4, 0, 0]}
-              name="Total Repositories"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+
+      {/* ── Pie Chart Card ── */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-100 px-6 py-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
+            Distribution
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500">Proportional share across categories</p>
+        </div>
+
+        <div className="flex items-center justify-center pt-2 pb-0">
+          <ResponsiveContainer width="100%" height={260}>
+            <PieChart>
+              <Pie
+                activeIndex={activePieIndex}
+                activeShape={renderActiveShape}
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={95}
+                paddingAngle={3}
+                dataKey="value"
+                onMouseEnter={onPieEnter}
+                animationDuration={800}
+                stroke="none"
+              >
+                {pieData.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-px border-t border-gray-100 bg-gray-100">
+          {pieData.map((d) => {
+            const total = pieData.reduce((s, p) => s + p.value, 0) || 1;
+            return (
+              <div key={d.name} className="bg-white px-4 py-3 text-center">
+                <p className="text-lg font-bold text-gray-900">{d.value}</p>
+                <p className="text-[11px] text-gray-500">{d.name}</p>
+                <div className="mx-auto mt-1.5 h-1 w-10 overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(d.value / total) * 100}%`,
+                      backgroundColor: d.color,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Conversion badge */}
+        <div className="flex items-center justify-center border-t border-gray-100 px-6 py-3">
+          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ backgroundColor: "#e6f7f5" }}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: COLORS.searched }} />
+            <span className="text-xs font-medium" style={{ color: COLORS.searchedLight }}>
+              {conversionRate}% conversion rate
+            </span>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -67,3 +67,25 @@ export function increaseSearchedUsers(by: number) {
   localStorage.setItem(STATS_KEY, JSON.stringify(next));
   return next;
 }
+
+/* ── Recent Searches ── */
+
+const RECENT_SEARCHES_KEY = "devhire_recent_searches";
+const MAX_RECENT = 8;
+
+export function getRecentSearches(): string[] {
+  return readJson<string[]>(RECENT_SEARCHES_KEY, []);
+}
+
+export function addRecentSearch(query: string) {
+  const trimmed = query.trim().toLowerCase();
+  if (!trimmed) return;
+  const current = getRecentSearches().filter((q) => q !== trimmed);
+  const next = [trimmed, ...current].slice(0, MAX_RECENT);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+  return next;
+}
+
+export function clearRecentSearches() {
+  localStorage.removeItem(RECENT_SEARCHES_KEY);
+}
