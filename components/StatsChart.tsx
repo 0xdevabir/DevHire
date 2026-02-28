@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -12,7 +12,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Sector,
 } from "recharts";
 
 type Props = {
@@ -27,66 +26,6 @@ const COLORS = {
   repos: "#1b364a",
   searchedLight: "#2d7d74",
 };
-
-/* ── custom active-shape renderer for pie ── */
-function renderActiveShape(props: Record<string, unknown>) {
-  const {
-    cx,
-    cy,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-  } = props as {
-    cx: number;
-    cy: number;
-    innerRadius: number;
-    outerRadius: number;
-    startAngle: number;
-    endAngle: number;
-    fill: string;
-    payload: { name: string };
-    percent: number;
-    value: number;
-  };
-
-  return (
-    <g>
-      {/* label in centre */}
-      <text x={cx} y={cy - 8} textAnchor="middle" fill="#1f2937" className="text-sm font-semibold">
-        {payload.name}
-      </text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fill="#6b7280" className="text-xs">
-        {value} ({(percent * 100).toFixed(0)}%)
-      </text>
-
-      {/* active ring */}
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={(outerRadius as number) + 6}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={(innerRadius as number) - 4}
-        outerRadius={innerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-        opacity={0.35}
-      />
-    </g>
-  );
-}
 
 /* ── custom tooltip ── */
 function CustomTooltip({
@@ -114,12 +53,6 @@ function CustomTooltip({
 }
 
 export default function StatsChart({ searched, shortlisted, repos }: Props) {
-  const [activePieIndex, setActivePieIndex] = useState(0);
-
-  const onPieEnter = useCallback((_: unknown, index: number) => {
-    setActivePieIndex(index);
-  }, []);
-
   /* bar-chart data — break metrics into comparative groups for a richer chart */
   const barData = useMemo(() => {
     const total = searched + shortlisted + repos || 1;
@@ -232,8 +165,6 @@ export default function StatsChart({ searched, shortlisted, repos }: Props) {
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
-                activeIndex={activePieIndex}
-                activeShape={renderActiveShape}
                 data={pieData}
                 cx="50%"
                 cy="50%"
@@ -241,7 +172,6 @@ export default function StatsChart({ searched, shortlisted, repos }: Props) {
                 outerRadius={95}
                 paddingAngle={3}
                 dataKey="value"
-                onMouseEnter={onPieEnter}
                 animationDuration={800}
                 stroke="none"
               >

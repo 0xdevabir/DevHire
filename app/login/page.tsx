@@ -2,7 +2,7 @@
 
 import { loginClient } from "@/lib/auth";
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -11,7 +11,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const router = useRouter();
-    const searchParams = useSearchParams();
 
     useEffect(() => {
         const hasSession = document.cookie.includes("devhire_session=1");
@@ -21,10 +20,11 @@ export default function LoginPage() {
     }, [router]);
 
     useEffect(() => {
-        if (searchParams.get("intent") === "signup") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("intent") === "signup") {
             setNotice("New account creation is currently disabled. Please sign in with an existing account.");
         }
-    }, [searchParams]);
+    }, []);
 
     function handleLogin(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
