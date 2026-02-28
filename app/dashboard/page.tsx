@@ -46,7 +46,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <section className="grid gap-4 sm:grid-cols-3">
+        <section className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           {statItems.map((item, index) => (
             <StatCard key={item.label} label={item.label} value={item.value} index={index} />
           ))}

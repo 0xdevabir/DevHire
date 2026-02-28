@@ -91,7 +91,7 @@ export default function StatsChart({ searched, shortlisted, repos }: Props) {
   const conversionRate = searched > 0 ? ((shortlisted / searched) * 100).toFixed(1) : "0";
 
   return (
-    <section className="grid gap-6 lg:grid-cols-2">
+    <section className="grid gap-6 grid-cols-1 lg:grid-cols-2">
       {/* ── Bar Chart Card ── */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="border-b border-gray-100 px-6 py-4">

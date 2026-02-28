@@ -198,7 +198,7 @@ export default function DevelopersPage() {
             <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Popular Developers
             </h3>
-            <section className="mt-3 grid gap-3 sm:grid-cols-2">
+            <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {users.map((user) => (
                 <DeveloperCard key={user.id} user={user} />
               ))}

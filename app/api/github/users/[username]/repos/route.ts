@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   const perPage = Number(request.nextUrl.searchParams.get("perPage") ?? "10");
 
   try {
-    const data = await getGithubUserRepos(username, Math.max(1, page), Math.min(20, Math.max(1, perPage)));
+    const data = await getGithubUserRepos(username, Math.max(1, page), Math.min(100, Math.max(1, perPage)));
     return NextResponse.json(data);
   } catch {
     return NextResponse.json(

@@ -3,7 +3,7 @@
 import { logoutClient } from "@/lib/auth";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -32,32 +32,62 @@ const navIcons: Record<string, React.ReactNode> = {
 export default function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
+  // Desktop: expanded/collapsed. Mobile: open/closed overlay.
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Left Sidebar */}
+      {/* ── Mobile overlay backdrop ── */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar ── */}
+      {/* Mobile: slides in as overlay. Desktop: fixed sidebar with collapse. */}
       <aside
         style={{ backgroundColor: "var(--brand-navy)" }}
-        className={`${
-          sidebarOpen ? "w-60" : "w-[68px]"
-        } fixed inset-y-0 left-0 z-30 flex flex-col transition-all duration-300`}
+        className={`
+          fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+          w-60
+          md:translate-x-0 md:z-30
+          ${sidebarOpen ? "md:w-60" : "md:w-[68px]"}
+        `}
       >
         {/* Logo */}
-        <Link href="/">
-        <div className="flex h-16 items-center gap-3 px-4">
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
-            style={{ backgroundColor: "var(--brand-teal)" }}
-          >
-            D
-          </div>
-          {sidebarOpen && (
+        <Link href="/" onClick={() => setMobileOpen(false)}>
+          <div className="flex h-16 items-center gap-3 px-4">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+              style={{ backgroundColor: "var(--brand-teal)" }}
+            >
+              D
+            </div>
+            {/* Always show text on mobile drawer; respect sidebarOpen on desktop */}
             <span className="text-lg font-semibold tracking-tight text-white">
               DevHire
             </span>
-          )}
-        </div></Link>
+          </div>
+        </Link>
 
         {/* Divider */}
         <div className="mx-4 border-t border-white/10" />
@@ -71,6 +101,7 @@ export default function AppShell({ children }: PropsWithChildren) {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-white/15 text-white"
@@ -78,17 +109,19 @@ export default function AppShell({ children }: PropsWithChildren) {
                 }`}
               >
                 <span className="shrink-0">{navIcons[item.href]}</span>
-                {sidebarOpen && <span>{item.label}</span>}
+                {/* Always show label on mobile; respect collapse on desktop */}
+                <span className="inline md:hidden">{item.label}</span>
+                {sidebarOpen && <span className="hidden md:inline">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* Collapse toggle + Logout */}
+        {/* Collapse toggle (desktop only) + Logout */}
         <div className="space-y-1 border-t border-white/10 p-3">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            className="hidden w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white md:flex"
           >
             <svg
               className={`h-[18px] w-[18px] shrink-0 transition-transform ${
@@ -110,6 +143,7 @@ export default function AppShell({ children }: PropsWithChildren) {
           <button
             onClick={() => {
               logoutClient();
+              setMobileOpen(false);
               router.replace("/login");
             }}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-rose-500/20 hover:text-rose-300"
@@ -127,20 +161,31 @@ export default function AppShell({ children }: PropsWithChildren) {
                 d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
               />
             </svg>
-            {sidebarOpen && <span>Logout</span>}
+            <span className="inline md:hidden">Logout</span>
+            {sidebarOpen && <span className="hidden md:inline">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main area */}
+      {/* ── Main area ── */}
       <div
-        className={`flex flex-1 flex-col transition-all duration-300 ${
-          sidebarOpen ? "ml-60" : "ml-[68px]"
+        className={`flex flex-1 flex-col transition-all duration-300 ml-0 ${
+          sidebarOpen ? "md:ml-60" : "md:ml-[68px]"
         }`}
       >
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-6 backdrop-blur-sm">
-          <h2 className="text-base font-semibold capitalize text-gray-900">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur-sm sm:h-16 sm:px-6">
+          {/* Hamburger (mobile only) */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="mr-3 rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-100 md:hidden"
+            aria-label="Open menu"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <h2 className="text-sm font-semibold capitalize text-gray-900 sm:text-base">
             {pathname.split("/").filter(Boolean).pop() || "Dashboard"}
           </h2>
           <div
@@ -152,7 +197,7 @@ export default function AppShell({ children }: PropsWithChildren) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-4 sm:p-6">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>

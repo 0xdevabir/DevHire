@@ -7,7 +7,7 @@ export default async function HomePage() {
   const hasSession = cookieStore.get(authCookieName)?.value === "1";
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 px-6 py-16">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 px-4 py-12 sm:px-6 sm:py-16">
       <div
         className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full opacity-20 blur-3xl"
         style={{ backgroundColor: "var(--brand-teal)" }}
@@ -17,7 +17,7 @@ export default async function HomePage() {
         style={{ backgroundColor: "var(--brand-navy)" }}
       />
 
-      <main className="relative w-full max-w-3xl rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-sm backdrop-blur-sm md:p-12">
+      <main className="relative w-full max-w-3xl rounded-2xl border border-gray-200 bg-white/90 p-5 shadow-sm backdrop-blur-sm sm:p-8 md:p-12">
         <div className="mx-auto max-w-2xl text-center">
           <p
             className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
@@ -25,7 +25,7 @@ export default async function HomePage() {
           >
             DevHire Platform
           </p>
-          <h1 className="mt-5 text-3xl font-bold tracking-tight text-gray-900 md:text-5xl">
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:text-5xl">
             Find and shortlist top GitHub developers, faster.
           </h1>
           <p className="mt-4 text-sm leading-6 text-gray-600 md:text-base">
