@@ -44,6 +44,7 @@ export default function AppShell({ children }: PropsWithChildren) {
         } fixed inset-y-0 left-0 z-30 flex flex-col transition-all duration-300`}
       >
         {/* Logo */}
+        <Link href="/">
         <div className="flex h-16 items-center gap-3 px-4">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
@@ -56,7 +57,7 @@ export default function AppShell({ children }: PropsWithChildren) {
               DevHire
             </span>
           )}
-        </div>
+        </div></Link>
 
         {/* Divider */}
         <div className="mx-4 border-t border-white/10" />

@@ -25,6 +25,7 @@ export default function DeveloperProfilePage({ params }: Props) {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
   const [currentComment, setCurrentComment] = useState("");
+  const [currentLabel, setCurrentLabel] = useState("");
 
   useEffect(() => {
     void loadData(username, repoPage);
@@ -46,6 +47,7 @@ export default function DeveloperProfilePage({ params }: Props) {
       if (entry) {
         setCurrentRating(entry.rating);
         setCurrentComment(entry.comment);
+        setCurrentLabel(entry.label);
       }
     } catch {
       setError("Could not load profile data. Please try again.");
@@ -61,17 +63,19 @@ export default function DeveloperProfilePage({ params }: Props) {
       setShortlisted(false);
       setCurrentRating(0);
       setCurrentComment("");
+      setCurrentLabel("");
       return;
     }
     addToShortlist(profile);
     setShortlisted(true);
   }
 
-  function handleReviewSave(rating: number, comment: string) {
+  function handleReviewSave(rating: number, comment: string, label: string) {
     if (!profile) return;
-    updateShortlistReview(profile.login, rating, comment);
+    updateShortlistReview(profile.login, rating, comment, label);
     setCurrentRating(rating);
     setCurrentComment(comment);
+    setCurrentLabel(label);
   }
 
   return (
@@ -153,9 +157,14 @@ export default function DeveloperProfilePage({ params }: Props) {
               )}
 
               {/* Inline review display */}
-              {shortlisted && currentRating > 0 && (
+              {shortlisted && (currentRating > 0 || currentLabel) && (
                 <div className="mt-4 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                  <StarRating rating={currentRating} size="sm" />
+                  {currentLabel && (
+                    <span className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: 'var(--brand-teal)' }}>
+                      {currentLabel}
+                    </span>
+                  )}
+                  {currentRating > 0 && <StarRating rating={currentRating} size="sm" />}
                   {currentComment && (
                     <span className="truncate text-sm text-gray-600">{currentComment}</span>
                   )}
@@ -252,6 +261,7 @@ export default function DeveloperProfilePage({ params }: Props) {
         onSave={handleReviewSave}
         initialRating={currentRating}
         initialComment={currentComment}
+        initialLabel={currentLabel}
         candidateName={profile?.name || profile?.login || username}
       />
     </AppShell>

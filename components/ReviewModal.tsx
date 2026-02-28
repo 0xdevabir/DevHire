@@ -2,12 +2,24 @@
 
 import { useEffect, useState } from "react";
 
+const SUGGESTED_LABELS = [
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "DevOps Engineer",
+  "Mobile Developer",
+  "UI/UX Designer",
+  "Data Engineer",
+  "ML Engineer",
+];
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSave: (rating: number, comment: string) => void;
+  onSave: (rating: number, comment: string, label: string) => void;
   initialRating?: number;
   initialComment?: string;
+  initialLabel?: string;
   candidateName: string;
 };
 
@@ -31,20 +43,23 @@ export default function ReviewModal({
   onSave,
   initialRating = 0,
   initialComment = "",
+  initialLabel = "",
   candidateName,
 }: Props) {
   const [rating, setRating] = useState(initialRating);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [comment, setComment] = useState(initialComment);
+  const [label, setLabel] = useState(initialLabel);
 
   // Sync internal state when modal opens with new values
   useEffect(() => {
     if (open) {
       setRating(initialRating);
       setComment(initialComment);
+      setLabel(initialLabel);
       setHoveredStar(0);
     }
-  }, [open, initialRating, initialComment]);
+  }, [open, initialRating, initialComment, initialLabel]);
 
   if (!open) return null;
 
@@ -53,7 +68,7 @@ export default function ReviewModal({
   const ratingLabels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
 
   function handleSave() {
-    onSave(rating, comment.trim());
+    onSave(rating, comment.trim(), label.trim());
     onClose();
   }
 
@@ -105,8 +120,42 @@ export default function ReviewModal({
             </button>
           </div>
 
-          {/* Star Rating */}
+          {/* Label */}
           <div className="mt-6">
+            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Label / Role
+            </label>
+            <input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g. Frontend Developer"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-transparent focus:bg-white focus:ring-2"
+              style={
+                { "--tw-ring-color": "var(--brand-teal)" } as React.CSSProperties
+              }
+            />
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {SUGGESTED_LABELS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setLabel(s)}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                    label === s
+                      ? "border-transparent text-white"
+                      : "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
+                  }`}
+                  style={label === s ? { backgroundColor: "var(--brand-teal)" } : {}}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Star Rating */}
+          <div className="mt-5">
             <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Rating
             </label>

@@ -42,6 +42,7 @@ export function addToShortlist(profile: GithubUserProfile, rating = 0, comment =
       addedAt: new Date().toISOString(),
       rating,
       comment,
+      label: "",
     },
     ...current,
   ];
@@ -56,10 +57,10 @@ export function removeFromShortlist(username: string) {
   return next;
 }
 
-export function updateShortlistReview(username: string, rating: number, comment: string) {
+export function updateShortlistReview(username: string, rating: number, comment: string, label: string) {
   const next = getShortlist().map((c) =>
     c.username.toLowerCase() === username.toLowerCase()
-      ? { ...c, rating, comment }
+      ? { ...c, rating, comment, label }
       : c,
   );
   localStorage.setItem(SHORTLIST_KEY, JSON.stringify(next));

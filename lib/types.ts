@@ -47,6 +47,7 @@ export type ShortlistedCandidate = {
   addedAt: string;
   rating: number;
   comment: string;
+  label: string;
 };
 
 export type DashboardStats = {

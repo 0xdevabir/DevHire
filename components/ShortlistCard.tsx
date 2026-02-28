@@ -29,6 +29,13 @@ export default function ShortlistCard({ candidate, onRemove, onEdit }: Props) {
               {candidate.company || "No company"} &middot; {candidate.location || "No location"}
             </p>
 
+            {/* Label badge */}
+            {candidate.label && (
+              <span className="mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: 'var(--brand-teal)' }}>
+                {candidate.label}
+              </span>
+            )}
+
             {/* Rating display */}
             {candidate.rating > 0 && (
               <div className="mt-2 flex items-center gap-2">
