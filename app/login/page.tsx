@@ -26,10 +26,18 @@ export default function LoginPage() {
         }
     }, []);
 
-    function handleLogin(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+    const DEMO_EMAIL = "demo@devhire.com";
+    const DEMO_PASSWORD = "demo1234";
+
+    function completeLogin(nextEmail: string) {
         setError("");
         setNotice("");
+        loginClient(nextEmail);
+        router.replace("/dashboard");
+    }
+
+    function handleLogin(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
 
         const cleanEmail = email.trim();
         const cleanPassword = password.trim();
@@ -39,8 +47,13 @@ export default function LoginPage() {
             return;
         }
 
-        loginClient(cleanEmail);
-        router.replace("/dashboard");
+        completeLogin(cleanEmail);
+    }
+
+    function handleDemoLogin() {
+        setEmail(DEMO_EMAIL);
+        setPassword(DEMO_PASSWORD);
+        completeLogin(DEMO_EMAIL);
     }
 
     return (
@@ -98,6 +111,17 @@ export default function LoginPage() {
                 >
                     Sign In
                 </button>
+
+                <button
+                    type="button"
+                    onClick={handleDemoLogin}
+                    className="mt-3 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                    Demo Login
+                </button>
+                <p className="mt-2 text-center text-xs text-gray-400">
+                    Uses {DEMO_EMAIL} / {DEMO_PASSWORD}
+                </p>
 
                 <div className="mt-4 text-center text-sm text-gray-600">
                     New here?{" "}
