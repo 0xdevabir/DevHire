@@ -1,6 +1,7 @@
 "use client";
 
 import { loginClient } from "@/lib/auth";
+import { seedDemoData } from "@/lib/demo-seed";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -53,6 +54,7 @@ export default function LoginPage() {
     function handleDemoLogin() {
         setEmail(DEMO_EMAIL);
         setPassword(DEMO_PASSWORD);
+        seedDemoData();
         completeLogin(DEMO_EMAIL);
     }
 
